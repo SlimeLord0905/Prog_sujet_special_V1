@@ -133,6 +133,7 @@ namespace mdpRandom1
                     } while (Answer2 != "3");
                 }
             } while (answer != "3");
+            ActivePasswords.Clear();
         }
     }
 }
