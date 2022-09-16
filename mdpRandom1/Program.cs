@@ -3,7 +3,7 @@
 
 using System.Text.Json;
 
-using Crypto;
+using CryptoLib;
 
 namespace mdpRandom1
 {
@@ -25,6 +25,7 @@ namespace mdpRandom1
             string path = Directory.GetParent(Environment.CurrentDirectory)?.Parent?.Parent?.FullName ?? "";
             path = Path.Combine(path, "passwords.dat");
             string json = aes.DecryptFromFile(path);
+            
             
             ActivePasswords= JsonSerializer.Deserialize<List<Mdp>>(json) ?? new List<Mdp>();
             do
@@ -109,75 +110,95 @@ namespace mdpRandom1
                         {
                             Console.WriteLine("type the username associated with your password");
                             string recherche = Console.ReadLine();
-
+                            int removeAt = -1;
+                            Mdp passwordToDelete = new Mdp(null,null);
+                            bool deleteflag = false;
                             foreach (Mdp mdp in ActivePasswords)
                             {
-                                if (mdp.Username.Equals(recherche))
+                                removeAt++;
+                                if (mdp.Username.Equals(recherche) && !mdp.Deleted)
                                 {
-                                    Console.WriteLine("Username: "+mdp.Username+" Password: "+ aes.Encrypt((mdp.Password)));
+                                    Console.WriteLine("Username: " + mdp.Username + " Password: " +
+                                                      aes.Encrypt((mdp.Password)));
+
+
+                                    string Answer3;
+                                    bool hidden = false;
+                                    do
+                                    {
+
+                                        Console.WriteLine(
+                                            "voulez vous décripter(1), updater(2), supprimer(3), cacher le mdp déchiffrer(4) ou quitter(5)");
+                                        Answer3 = Console.ReadLine();
+                                        if (Answer3 == "1")
+                                        {
+                                            Console.WriteLine(
+                                                "Username: " + mdp.Username + " Password: " + mdp.Password);
+                                        }
+
+                                        if (Answer3 == "2")
+                                        {
+                                            Console.WriteLine("voules vous updater le username(1) ou le mdp(2)");
+                                            string Answer4 = Console.ReadLine();
+                                            if (Answer4 == "1")
+                                            {
+                                                Console.WriteLine("entrez votre nouveau username");
+                                                mdp.Username = Console.ReadLine();
+                                            }
+                                            else
+                                            {
+                                                Console.WriteLine("Vous allez générer un nouveau mot de passe ");
+                                                mdp.Password = Console.ReadLine();
+                                            }
+                                        }
+
+                                        if (Answer3 == "4")
+                                        {
+                                            Console.Clear();
+                                            if (!hidden)
+                                            {
+                                                Console.WriteLine("Username: " + mdp.Username +
+                                                                  " Password: **************");
+
+                                                hidden = true;
+                                            }
+                                            else
+                                            {
+                                                Console.WriteLine("Username: " + mdp.Username + " Password: " +
+                                                                  mdp.Password);
+
+                                                hidden = false;
+                                            }
+                                        }
+
+                                        if (Answer3 == "3")
+                                        {
+                                            mdp.Deleted = true;
+                                            mdp.Username = "**redacted**";
+                                            mdp.Password = "**redacted**";
+                                            Answer3 = "5";
+                                        }
+
+                                        JsonSerializerOptions options = new JsonSerializerOptions{ WriteIndented = true };
+                                        json = JsonSerializer.Serialize(ActivePasswords, options);
+
+                                        aes.EncryptToFile(json, path);
+
+
+                                    } while (Answer3 != "5");
+                                    
                                 }
-
-                                string Answer3;
-                                bool hidden = false;
-                                do
-                                {
-                                        
-                                    Console.WriteLine("voulez vous décripter(1), updater(2), supprimer(3), cacher le mdp déchiffrer(4) ou quitter(5)");
-                                    Answer3 = Console.ReadLine();
-                                    if (Answer3 == "1")
-                                    {
-                                        Console.WriteLine("Username: "+mdp.Username+" Password: "+ mdp.Password);
-                                    }
-                                    if (Answer3 == "2")
-                                    {
-                                        Console.WriteLine("voules vous updater le mdp(1) ou le username(2)");
-                                        string Answer4 = Console.ReadLine();
-                                        if (Answer4 == "1")
-                                        {
-                                            Console.WriteLine("entrez votre nouveau username");
-                                            mdp.Username = Console.ReadLine();
-                                        }
-                                        else
-                                        {
-                                            Console.WriteLine("entrez votre nouveau mot de passe");
-                                            mdp.Password = Console.ReadLine();
-                                        }
-                                    }
-                                    if (Answer3 == "4")
-                                    {
-                                        Console.Clear();
-                                        if (hidden)
-                                        {
-                                            Console.WriteLine("Username: "+mdp.Username+" Password: "+ mdp.Password);
-                                            hidden = true;
-                                        }
-                                        else
-                                        {
-                                            Console.WriteLine("Username: " + mdp.Username + " Password: **************");
-                                            hidden = false;
-                                        }
-                                    }
-                                    if (Answer3 == "3")
-                                    {
-                                        ActivePasswords.Remove(mdp);
-                                    }
-                                    JsonSerializerOptions options = new JsonSerializerOptions { WriteIndented = true };
-                                    json = JsonSerializer.Serialize(ActivePasswords, options);
-                                    Console.WriteLine(json);
-                            
-                           
-                           
-                                    aes.EncryptToFile(json, path);
-
-                                        
-                                } while (Answer3 != "5");
                             }
                         }
                         else if (Answer2 == "2")
                         {
                             foreach (Mdp mdp in ActivePasswords)
                             {
-                                Console.WriteLine("Username: "+mdp.Username+" Password: "+ aes.Encrypt((mdp.Password)));
+                                if (!mdp.Deleted)
+                                {
+                                    Console.WriteLine("Username: " + mdp.Username + " Password: " +
+                                                      aes.Encrypt((mdp.Password)));
+                                }
                             }
                         }
                         

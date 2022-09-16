@@ -1,7 +1,7 @@
 using System.Security.Cryptography;
 using System.Text;
 
-namespace Crypto;
+namespace CryptoLib;
 
 public class AesCrypter
 {

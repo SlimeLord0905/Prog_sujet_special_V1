@@ -12,7 +12,7 @@
     </ItemGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\crypto\crypto.csproj" />
+      <ProjectReference Include="..\CryptoLib\CryptoLib.csproj" />
     </ItemGroup>
 
 </Project>
