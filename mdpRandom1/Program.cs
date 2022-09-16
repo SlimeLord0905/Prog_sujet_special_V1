@@ -179,14 +179,14 @@ namespace mdpRandom1
                                             Answer3 = "5";
                                         }
 
-                                        JsonSerializerOptions options = new JsonSerializerOptions{ WriteIndented = true };
+                                        JsonSerializerOptions options = new JsonSerializerOptions
+                                            { WriteIndented = true };
                                         json = JsonSerializer.Serialize(ActivePasswords, options);
 
                                         aes.EncryptToFile(json, path);
 
 
                                     } while (Answer3 != "5");
-                                    
                                 }
                             }
                         }
