@@ -1,39 +1,30 @@
-﻿namespace CryptoLib;
-
+﻿using System.Data.SQLite;
 using MySql.Data.MySqlClient;
 
+namespace CryptoLib;
 
-public class DBcontroller
+public class DBcontrollerOffline
 {
-    private string connectionString;
-    private MySqlConnection con;
+     private string connectionString;
+    private SQLiteConnection con;
     private string sql;
     
-    public DBcontroller()
+    public DBcontrollerOffline()
     {
-        connectionString = "Host=192.168.163.129;Username=dev;Password=pwd;Database=mdp_app";
-
-        con = new MySqlConnection(connectionString);
+        string path = Directory.GetParent(Environment.CurrentDirectory)?.Parent?.Parent?.FullName ?? "";
+        path = Path.Combine(path, "passwords.sqlite");
+        connectionString = "URI=file:" + path;
+        
+        con = new SQLiteConnection(connectionString);
         con.Open();
 
-        sql = "SELECT version()";
-
-        /*using (var cmd = new MySqlCommand(sql, con))
-        {
-            var version = cmd.ExecuteScalar().ToString();
-            Console.WriteLine($"MySQL version: {version}");
-        }*/
         
-        
-        /*sql = "UPDATE users SET password = '$2a$11$OSFaWfy8m5YH.6KOXoTXVuc3KFqIKbGVkpQoFncPDnQitbWyHZ1tm'WHERE id = 1";
-        var cmd = new MySqlCommand(sql, con);
-        cmd.ExecuteNonQuery();*/
     }
 
     public bool adduser(String username, String fullname , String email, String password)
     {
         sql = "INSERT into users (username,fullname,password,email) VALUES ('"+username+"','"+fullname+"','"+password+"','"+email+"')";
-        var cmd = new MySqlCommand(sql, con);
+        var cmd = new SQLiteCommand(sql, con);
         try
         {
             var result = cmd.ExecuteNonQuery();
@@ -55,8 +46,8 @@ public class DBcontroller
     public user ConnecteUser(String username, String password)
     {
         user usr = new user(-1);
-        sql = "SELECT * FROM users WHERE username ='" + username + "' and password = '" + password+ "'";
-        using (var cmd = new MySqlCommand(sql, con))
+        sql = "SELECT * FROM users WHERE username ='" + username + "'";
+        using (var cmd = new SQLiteCommand(sql, con))
         {
             var reader = cmd.ExecuteReader();
             while(reader.Read())
@@ -67,10 +58,16 @@ public class DBcontroller
                 usr.password = reader.GetString((3));
                 usr.email = reader.GetString(4);
             }
-            reader.Close();        
+            reader.Close();
+            if (BCrypt.Net.BCrypt.Verify(usr.password, password))
+            {
+                ConnectedUpdate(usr.id);
+            }
+            else
+            {
+                usr.id = -1;
+            }
         }
-
-        ConnectedUpdate(usr.id);
         return usr;
     }
 
@@ -79,7 +76,7 @@ public class DBcontroller
         List<password> userMdp = new List<password>();
 
         sql = "SELECT * FROM passwords WHERE user_id ='"+id+"'";
-        using (var cmd = new MySqlCommand(sql, con))
+        using (var cmd = new SQLiteCommand(sql, con))
         {
             var reader = cmd.ExecuteReader();
             while(reader.Read())
@@ -97,8 +94,8 @@ public class DBcontroller
 
     public bool ConnectedUpdate(int id)
     {
-        sql = "UPDATE users SET last_connection = CURRENT_DATE()";
-        var cmd = new MySqlCommand(sql, con);
+        sql = "UPDATE users SET last_connection = DATE('now')";
+        var cmd = new SQLiteCommand(sql, con);
         try
         {
             var result = cmd.ExecuteNonQuery();
@@ -121,7 +118,7 @@ public class DBcontroller
     public bool DeletePassword(int id)
     {
         sql = "DELETE FROM passwords WHERE id ='" + id + "'";
-        var cmd = new MySqlCommand(sql, con);
+        var cmd = new SQLiteCommand(sql, con);
         var exe = cmd.ExecuteNonQuery();
         if (exe > 0)
         {
@@ -134,8 +131,8 @@ public class DBcontroller
     }
     public bool AddPassword(int usr_id, String site, String login , String password )
     {
-        sql = "INSERT into passwords (user_id,site,login,password) VALUES ('"+usr_id+"','"+site+"','"+login+"','"+password+"')";
-        var cmd = new MySqlCommand(sql, con);
+        sql = "INSERT into passwords (user_id,site,username,password,created_at,modified_at) VALUES ('"+usr_id+"','"+site+"','"+login+"','"+password+"',DATE('now'), DATE('now') )";
+        var cmd = new SQLiteCommand(sql, con);
         try
         {
             var result = cmd.ExecuteNonQuery();
@@ -156,8 +153,54 @@ public class DBcontroller
     }
     public bool UpdatePassword(int id, int usr_id, String site, String login, String password)
     {
-        sql = "UPDATE passwords SET user_id ='"+usr_id+"' ,site = '"+site+"',login = '"+login+"',password = '"+password+"',modified_at = CURRENT_DATE WHERE id = '"+id+"'";
-        var cmd = new MySqlCommand(sql, con);
+        sql = "UPDATE passwords SET user_id ='"+usr_id+"' ,site = '"+site+"',username = '"+login+"',password = '"+password+"',modified_at = DATE('now') WHERE id = '"+id+"'";
+        var cmd = new SQLiteCommand(sql, con);
+        try
+        {
+            var result = cmd.ExecuteNonQuery();
+            if (result != 1)
+            {
+                return false;
+            }
+            else
+            {
+                return true;
+            }
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine("The information you entered were invalid");
+            return false;
+        }
+    }
+
+    public bool AddPasswordToDelete(int id)
+    {
+        sql = "INSERT into Delete_at_sync (password_id) VALUES ('" + id + "')";
+        var cmd = new SQLiteCommand(sql, con);
+        try
+        {
+            var result = cmd.ExecuteNonQuery();
+            if (result != 1)
+            {
+                return false;
+            }
+            else
+            {
+                return true;
+            }
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine("The information you entered were invalid");
+            return false;
+        }
+    }
+
+    public bool RemovePasswordToDelete(int id)
+    {
+        sql = "DELETE from Delete_at_sync WHERE password_id = ('" + id + "')";
+        var cmd = new SQLiteCommand(sql, con);
         try
         {
             var result = cmd.ExecuteNonQuery();

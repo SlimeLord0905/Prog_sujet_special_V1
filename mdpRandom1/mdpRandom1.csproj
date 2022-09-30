@@ -9,6 +9,7 @@
 
     <ItemGroup>
       <PackageReference Include="BCrypt.Net-Next" Version="4.0.3" />
+      <PackageReference Include="bondx" Version="1.0.9" />
     </ItemGroup>
 
     <ItemGroup>

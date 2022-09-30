@@ -7,4 +7,9 @@ public class user
     public string email { get; set; }
     public string password { get; set; }
     public int id { get; set; } = -1;
+
+    public user(int id)
+    {
+        this.id = id;
+    }
 }

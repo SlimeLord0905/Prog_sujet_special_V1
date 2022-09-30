@@ -8,5 +8,12 @@
       <jdbc-url>jdbc:mariadb://192.168.163.129:3306/mdp_app</jdbc-url>
       <working-dir>$ProjectFileDir$</working-dir>
     </data-source>
+    <data-source source="LOCAL" name="passwords.sqlite" uuid="c3e192e8-28c0-477d-9c7b-30a94e05370b">
+      <driver-ref>sqlite.xerial</driver-ref>
+      <synchronize>true</synchronize>
+      <jdbc-driver>org.sqlite.JDBC</jdbc-driver>
+      <jdbc-url>jdbc:sqlite:$PROJECT_DIR$/mdpRandom1/passwords.sqlite</jdbc-url>
+      <working-dir>$ProjectFileDir$</working-dir>
+    </data-source>
   </component>
 </project>

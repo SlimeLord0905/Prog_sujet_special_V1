@@ -21,21 +21,36 @@ namespace mdpRandom1
         
         static void Main(string[] args)
         {
+            bool Online = false;
+            user CurrentUser = new user(-1);
             AesCrypter aes = new AesCrypter("hiddenkey");
             string path = Directory.GetParent(Environment.CurrentDirectory)?.Parent?.Parent?.FullName ?? "";
             path = Path.Combine(path, "passwords.dat");
             string json = aes.DecryptFromFile(path);
             DBcontroller Db = new DBcontroller();
-
-            user CurrentUser = Db.ConnecteUser("denis", "12345678");
-            if (CurrentUser.id != -1)
+            
+            Console.WriteLine("Do you want to be on 1)Online mode 2)Offline Mode");
+            string ans = Console.ReadLine();
+            if (ans == "1")
             {
-                Console.WriteLine("connection ok");
+                Online = true;
+            }
+            //String pwd = BCrypt.Net.BCrypt.HashPassword("12345678");
+           // Console.WriteLine(pwd);
+            while (CurrentUser.id == -1)
+            {
+                CurrentUser = Db.ConnecteUser("denis", "12345678" );
+                if (CurrentUser.id != -1)
+                {
+                    Console.WriteLine("connection ok");
+                }
             }
 
             //Db.AddPassword(1, "youtube", "Lord0905", "unpasswordtest");
             //Db.UpdatePassword(3,1, "youtube", "Lord0905", "unpassword");
             //Db.DeletePassword(3);
+            //Db.AddPasswordToDelete(1);
+           // Db.RemovePasswordToDelete(1);
 
             /*if (Db.adduser("lord", "Mathieu Mercier", "mercier@gmail.com", "unpassword0905"))
             {
