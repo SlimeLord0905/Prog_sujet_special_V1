@@ -25,8 +25,34 @@ namespace mdpRandom1
             string path = Directory.GetParent(Environment.CurrentDirectory)?.Parent?.Parent?.FullName ?? "";
             path = Path.Combine(path, "passwords.dat");
             string json = aes.DecryptFromFile(path);
-            
-            
+            DBcontroller Db = new DBcontroller();
+
+            user CurrentUser = Db.ConnecteUser("denis", "12345678");
+            if (CurrentUser.id != -1)
+            {
+                Console.WriteLine("connection ok");
+            }
+
+            //Db.AddPassword(1, "youtube", "Lord0905", "unpasswordtest");
+            //Db.UpdatePassword(3,1, "youtube", "Lord0905", "unpassword");
+            //Db.DeletePassword(3);
+
+            /*if (Db.adduser("lord", "Mathieu Mercier", "mercier@gmail.com", "unpassword0905"))
+            {
+                Console.WriteLine("adduser ok");
+            }*/
+            /*List<password> currentpwd = Db.GetUserPasswords(CurrentUser.id);
+            if (currentpwd[0] != null)
+            {
+                foreach (password pwd in currentpwd)
+                {
+                    Console.WriteLine(pwd.id);
+                    Console.WriteLine(pwd.user_id);
+                    Console.WriteLine(pwd.site);
+                    Console.WriteLine(pwd.login);
+                    Console.WriteLine(pwd.Password);
+                }
+            }*/
             ActivePasswords= JsonSerializer.Deserialize<List<Mdp>>(json) ?? new List<Mdp>();
             do
             {
