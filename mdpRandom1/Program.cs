@@ -28,6 +28,8 @@ namespace mdpRandom1
             path = Path.Combine(path, "passwords.dat");
             string json = aes.DecryptFromFile(path);
             DBcontroller Db = new DBcontroller();
+            DBcontrollerOffline DbOf = new DBcontrollerOffline();
+            List<password> currentpwd;
             
             Console.WriteLine("Do you want to be on 1)Online mode 2)Offline Mode");
             string ans = Console.ReadLine();
@@ -37,16 +39,24 @@ namespace mdpRandom1
             }
             //String pwd = BCrypt.Net.BCrypt.HashPassword("12345678");
            // Console.WriteLine(pwd);
-            while (CurrentUser.id == -1)
-            {
-                CurrentUser = Db.ConnecteUser("denis", "12345678" );
-                if (CurrentUser.id != -1)
-                {
-                    Console.WriteLine("connection ok");
-                }
-            }
+           if (Online)
+           {
+               while (CurrentUser.id == -1)
+               {
+                   CurrentUser = Db.ConnecteUser("denis", "12345678");
+                   if (CurrentUser.id != -1)
+                   {
+                       Console.WriteLine("connection ok");
+                   }
+               }
+               currentpwd = Db.GetUserPasswords(CurrentUser.id);
+           }
+           else
+           { 
+               currentpwd = DbOf.GetUserPasswords(1);
+           }
 
-            //Db.AddPassword(1, "youtube", "Lord0905", "unpasswordtest");
+           //Db.AddPassword(1, "youtube", "Lord0905", "unpasswordtest");
             //Db.UpdatePassword(3,1, "youtube", "Lord0905", "unpassword");
             //Db.DeletePassword(3);
             //Db.AddPasswordToDelete(1);
@@ -56,19 +66,8 @@ namespace mdpRandom1
             {
                 Console.WriteLine("adduser ok");
             }*/
-            /*List<password> currentpwd = Db.GetUserPasswords(CurrentUser.id);
-            if (currentpwd[0] != null)
-            {
-                foreach (password pwd in currentpwd)
-                {
-                    Console.WriteLine(pwd.id);
-                    Console.WriteLine(pwd.user_id);
-                    Console.WriteLine(pwd.site);
-                    Console.WriteLine(pwd.login);
-                    Console.WriteLine(pwd.Password);
-                }
-            }*/
-            ActivePasswords= JsonSerializer.Deserialize<List<Mdp>>(json) ?? new List<Mdp>();
+            
+            //ActivePasswords= JsonSerializer.Deserialize<List<Mdp>>(json) ?? new List<Mdp>();
             do
             {
                 
@@ -151,30 +150,31 @@ namespace mdpRandom1
                         {
                             Console.WriteLine("type the username associated with your password");
                             string recherche = Console.ReadLine();
-                            int removeAt = -1;
-                            Mdp passwordToDelete = new Mdp(null,null);
-                            bool deleteflag = false;
-                            foreach (Mdp mdp in ActivePasswords)
+                            foreach (password pwd in currentpwd)
                             {
-                                removeAt++;
-                                if (mdp.Username.Equals(recherche) && !mdp.Deleted)
+                                if (pwd.login.Equals(recherche))
                                 {
-                                    Console.WriteLine("Username: " + mdp.Username + " Password: " +
-                                                      aes.Encrypt((mdp.Password)));
-
-
+                                    Console.WriteLine(pwd.id);
+                                    Console.WriteLine(pwd.user_id);
+                                    Console.WriteLine(pwd.site);
+                                    Console.WriteLine(pwd.login);
+                                    Console.WriteLine(pwd.Password);
+                                    
                                     string Answer3;
                                     bool hidden = false;
                                     do
                                     {
 
-                                        Console.WriteLine(
-                                            "voulez vous décripter(1), updater(2), supprimer(3), cacher le mdp déchiffrer(4) ou quitter(5)");
+                                        Console.WriteLine("voulez vous décripter(1), updater(2), supprimer(3), cacher le mdp déchiffrer(4) ou quitter(5)");
                                         Answer3 = Console.ReadLine();
                                         if (Answer3 == "1")
                                         {
-                                            Console.WriteLine(
-                                                "Username: " + mdp.Username + " Password: " + mdp.Password);
+                                            Console.WriteLine(pwd.id);
+                                            Console.WriteLine(pwd.user_id);
+                                            Console.WriteLine(pwd.site);
+                                            Console.WriteLine(pwd.login);
+                                            String decrypted = aes.Decrypt(pwd.Password);
+                                            Console.WriteLine(decrypted);
                                         }
 
                                         if (Answer3 == "2")
@@ -183,13 +183,26 @@ namespace mdpRandom1
                                             string Answer4 = Console.ReadLine();
                                             if (Answer4 == "1")
                                             {
-                                                Console.WriteLine("entrez votre nouveau username");
-                                                mdp.Username = Console.ReadLine();
+                                                Console.WriteLine("entrez votre nouveau login");
+                                                pwd.login = Console.ReadLine();
+                                                if (Online)
+                                                {
+                                                    Db.UpdatePassword(pwd.id, pwd.user_id,pwd.site, pwd.login, pwd.Password);
+                                                }
+                                                DbOf.UpdatePassword(pwd.id, pwd.user_id,pwd.site, pwd.login, pwd.Password);
+
                                             }
                                             else
                                             {
                                                 Console.WriteLine("Vous allez générer un nouveau mot de passe ");
-                                                mdp.Password = Console.ReadLine();
+                                                pwd.Password = Console.ReadLine();
+                                                pwd.Password = aes.Encrypt(pwd.Password);
+                                                
+                                                if (Online)
+                                                {
+                                                    Db.UpdatePassword(pwd.id, pwd.user_id,pwd.site, pwd.login, pwd.Password);
+                                                }
+                                                DbOf.UpdatePassword(pwd.id, pwd.user_id,pwd.site, pwd.login, pwd.Password);
                                             }
                                         }
 
@@ -198,34 +211,49 @@ namespace mdpRandom1
                                             Console.Clear();
                                             if (!hidden)
                                             {
-                                                Console.WriteLine("Username: " + mdp.Username +
-                                                                  " Password: **************");
+                                                Console.WriteLine(pwd.id);
+                                                Console.WriteLine(pwd.user_id);
+                                                Console.WriteLine(pwd.site);
+                                                Console.WriteLine(pwd.login);
+                                                Console.WriteLine("********");
 
                                                 hidden = true;
                                             }
                                             else
                                             {
-                                                Console.WriteLine("Username: " + mdp.Username + " Password: " +
-                                                                  mdp.Password);
-
+                                                Console.WriteLine(pwd.id);
+                                                Console.WriteLine(pwd.user_id);
+                                                Console.WriteLine(pwd.site);
+                                                Console.WriteLine(pwd.login);
+                                                aes.Decrypt(pwd.Password);
+                                                Console.WriteLine(pwd.Password);
+                                                
                                                 hidden = false;
                                             }
                                         }
 
                                         if (Answer3 == "3")
                                         {
-                                            mdp.Deleted = true;
-                                            mdp.Username = "**redacted**";
-                                            mdp.Password = "**redacted**";
-                                            Answer3 = "5";
+                                            if (Online)
+                                            {
+                                                Db.DeletePassword(pwd.id);
+                                            }
+                                            DbOf.DeletePassword(pwd.id);
                                         }
 
-                                        JsonSerializerOptions options = new JsonSerializerOptions
+                                        /*JsonSerializerOptions options = new JsonSerializerOptions
                                             { WriteIndented = true };
                                         json = JsonSerializer.Serialize(ActivePasswords, options);
 
-                                        aes.EncryptToFile(json, path);
-
+                                        aes.EncryptToFile(json, path);*/
+                                        if(Online)
+                                        {
+                                            currentpwd = Db.GetUserPasswords(CurrentUser.id);
+                                        }
+                                        else
+                                        { 
+                                            currentpwd = DbOf.GetUserPasswords(1);
+                                        }
 
                                     } while (Answer3 != "5");
                                 }
@@ -235,22 +263,29 @@ namespace mdpRandom1
                         {
                             foreach (Mdp mdp in ActivePasswords)
                             {
-                                if (!mdp.Deleted)
+                                if (currentpwd[0] != null)
                                 {
-                                    Console.WriteLine("Username: " + mdp.Username + " Password: " +
-                                                      aes.Encrypt((mdp.Password)));
+                                    foreach (password pwd in currentpwd)
+                                    {
+                                        Console.WriteLine(pwd.id);
+                                        Console.WriteLine(pwd.user_id);
+                                        Console.WriteLine(pwd.site);
+                                        Console.WriteLine(pwd.login);
+                                        Console.WriteLine(pwd.Password);
+                                    }
                                 }
                             }
                         }
                         
                         
                         
-                        Console.WriteLine("type the username of the password(1), see the list(2) or quit(3)");
+                        Console.WriteLine("type the login of the password(1), see the list(2) or quit(3)");
                         Answer2 = Console.ReadLine();
                     } while (Answer2 != "3");
                 }
             } while (answer != "3");
-            ActivePasswords.Clear();
+
+            currentpwd.Clear();
         }
     }
 }

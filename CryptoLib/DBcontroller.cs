@@ -25,9 +25,9 @@ public class DBcontroller
         }*/
         
         
-        /*sql = "UPDATE users SET password = '$2a$11$OSFaWfy8m5YH.6KOXoTXVuc3KFqIKbGVkpQoFncPDnQitbWyHZ1tm'WHERE id = 1";
+        sql = "UPDATE users SET password=SHA2('12345678', 0) WHERE id = 1";
         var cmd = new MySqlCommand(sql, con);
-        cmd.ExecuteNonQuery();*/
+        cmd.ExecuteNonQuery();
     }
 
     public bool adduser(String username, String fullname , String email, String password)
@@ -55,7 +55,7 @@ public class DBcontroller
     public user ConnecteUser(String username, String password)
     {
         user usr = new user(-1);
-        sql = "SELECT * FROM users WHERE username ='" + username + "' and password = '" + password+ "'";
+        sql = "SELECT * FROM users WHERE username ='" + username + "' and password = SHA2('" + password + "',0)";
         using (var cmd = new MySqlCommand(sql, con))
         {
             var reader = cmd.ExecuteReader();
