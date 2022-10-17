@@ -15,7 +15,6 @@ namespace mdpRandom1
         static  string symbole = "!/$%?&*()";
         
         static string answer;
-        private static List<Mdp> ActivePasswords = new List<Mdp>();
         
         //get all active password from json file
         
@@ -30,6 +29,7 @@ namespace mdpRandom1
             DBcontroller Db = new DBcontroller();
             DBcontrollerOffline DbOf = new DBcontrollerOffline();
             List<password> currentpwd;
+            List<password> SyncPwd;
             
             Console.WriteLine("Do you want to be on 1)Online mode 2)Offline Mode");
             string ans = Console.ReadLine();
@@ -50,11 +50,18 @@ namespace mdpRandom1
                    }
                }
                currentpwd = Db.GetUserPasswords(CurrentUser.id);
+               SyncPwd = DbOf.GetUserPasswords(CurrentUser.id);
+               
+               
+
+
            }
            else
            { 
                currentpwd = DbOf.GetUserPasswords(1);
            }
+
+           DbOf.GetPasswordsToDelete(CurrentUser.id);
 
            //Db.AddPassword(1, "youtube", "Lord0905", "unpasswordtest");
             //Db.UpdatePassword(3,1, "youtube", "Lord0905", "unpassword");
@@ -77,8 +84,10 @@ namespace mdpRandom1
                 if (answer == "1")
                 {
 
-                    string password;
+                    string login;
+                    string pwd;
                     string username = "unknown";
+                    string site = "unknown";
                     int length = 16;
                     bool symb = false;
                     bool up = false;
@@ -120,20 +129,25 @@ namespace mdpRandom1
                             symb = true;
                         }
 
-                        password = PasswordGenerator.GeneratePassword(length, symb, num, up, true);
-                        Console.WriteLine(password);
-                        Console.WriteLine("Enter the username going with this password");
-                        username = Console.ReadLine() ?? "unknown";
-                        Mdp newmdp = new Mdp(username, password);
-                        ActivePasswords.Add(newmdp);
+                        pwd = PasswordGenerator.GeneratePassword(length, symb, num, up, true);
+                        Console.WriteLine(pwd);
+                        Console.WriteLine("Enter the Login going with this password");
+                        login = Console.ReadLine() ?? "unknown";
+                        Console.WriteLine("Enter the site going with this password");
+                        site = Console.ReadLine() ?? "unknown";
+
+                        pwd = aes.Encrypt(pwd);
+                        if (Online)
+                        {
+                            Db.AddPassword(CurrentUser.id, site, login, pwd);
+                        }
+                        DbOf.AddPassword(CurrentUser.id, site, login, pwd);
+
                         
-                        JsonSerializerOptions options = new JsonSerializerOptions { WriteIndented = true };
+                        /*JsonSerializerOptions options = new JsonSerializerOptions { WriteIndented = true };
                         json = JsonSerializer.Serialize(ActivePasswords, options);
-                        Console.WriteLine(json);
-                        
-                       
-                       
-                        aes.EncryptToFile(json, path);
+                        Console.WriteLine(json);*/
+                        /*aes.EncryptToFile(json, path);*/
                         
                         
                         Console.WriteLine("generate an other password y or n");
@@ -238,6 +252,10 @@ namespace mdpRandom1
                                             {
                                                 Db.DeletePassword(pwd.id);
                                             }
+                                            else
+                                            {
+                                                DbOf.addToDeleteList(pwd.id);
+                                            }
                                             DbOf.DeletePassword(pwd.id);
                                         }
 
@@ -261,19 +279,13 @@ namespace mdpRandom1
                         }
                         else if (Answer2 == "2")
                         {
-                            foreach (Mdp mdp in ActivePasswords)
+                            foreach (password pwd in currentpwd)
                             {
-                                if (currentpwd[0] != null)
-                                {
-                                    foreach (password pwd in currentpwd)
-                                    {
-                                        Console.WriteLine(pwd.id);
-                                        Console.WriteLine(pwd.user_id);
-                                        Console.WriteLine(pwd.site);
-                                        Console.WriteLine(pwd.login);
-                                        Console.WriteLine(pwd.Password);
-                                    }
-                                }
+                                Console.WriteLine(pwd.id);
+                                Console.WriteLine(pwd.user_id);
+                                Console.WriteLine(pwd.site);
+                                Console.WriteLine(pwd.login);
+                                Console.WriteLine(pwd.Password);
                             }
                         }
                         

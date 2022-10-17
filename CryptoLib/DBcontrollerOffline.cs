@@ -43,6 +43,29 @@ public class DBcontrollerOffline
             return false;
         }
     }
+
+    public bool addToDeleteList(int id)
+    {
+        sql = "INSERT into Delete_at_sync (password_id) VALUES ("+ id +")";
+        var cmd = new SQLiteCommand(sql, con);
+        try
+        {
+            var result = cmd.ExecuteNonQuery();
+            if (result != 1)
+            {
+                return false;
+            }
+            else
+            {
+                return true;
+            }
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine("The information you entered were invalid");
+            return false;
+        }
+    }
     public user ConnecteUser(String username, String password)
     {
         user usr = new user(-1);
@@ -85,11 +108,29 @@ public class DBcontrollerOffline
                     ,reader.GetInt32(1)
                     ,reader.GetString(2)
                     ,reader.GetString(3)
-                    ,reader.GetString(4) ));
+                    ,reader.GetString(4)
+                    ,reader.GetString(5)
+                    ,reader.GetString(6)));
             }
             reader.Close();        
         }
         return userMdp;
+    }
+    public List<int> GetPasswordsToDelete(int id)
+    {
+        List<int> Mdps = new List<int>();
+
+        sql = "SELECT * FROM Delete_at_sync";
+        using (var cmd = new SQLiteCommand(sql, con))
+        {
+            var reader = cmd.ExecuteReader();
+            while(reader.Read())
+            {
+                Mdps.Add((reader.GetInt32(0)));
+            }
+            reader.Close();        
+        }
+        return Mdps;
     }
 
     public bool ConnectedUpdate(int id)
