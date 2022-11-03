@@ -5,7 +5,7 @@ namespace CryptoLib;
 
 public class DBcontrollerOffline
 {
-     private string connectionString;
+    private string connectionString;
     private SQLiteConnection con;
     private string sql;
     
@@ -195,29 +195,6 @@ public class DBcontrollerOffline
     public bool UpdatePassword(int id, int usr_id, String site, String login, String password)
     {
         sql = "UPDATE passwords SET user_id ='"+usr_id+"' ,site = '"+site+"',username = '"+login+"',password = '"+password+"',modified_at = DATE('now') WHERE id = '"+id+"'";
-        var cmd = new SQLiteCommand(sql, con);
-        try
-        {
-            var result = cmd.ExecuteNonQuery();
-            if (result != 1)
-            {
-                return false;
-            }
-            else
-            {
-                return true;
-            }
-        }
-        catch (Exception e)
-        {
-            Console.WriteLine("The information you entered were invalid");
-            return false;
-        }
-    }
-
-    public bool AddPasswordToDelete(int id)
-    {
-        sql = "INSERT into Delete_at_sync (password_id) VALUES ('" + id + "')";
         var cmd = new SQLiteCommand(sql, con);
         try
         {

@@ -1,6 +1,7 @@
 ﻿// See https://aka.ms/new-console-template for more information
 //test
 
+using System.ComponentModel;
 using System.Text.Json;
 
 using CryptoLib;
@@ -29,7 +30,7 @@ namespace mdpRandom1
             DBcontroller Db = new DBcontroller();
             DBcontrollerOffline DbOf = new DBcontrollerOffline();
             List<password> currentpwd;
-            List<password> SyncPwd;
+            
             
             Console.WriteLine("Do you want to be on 1)Online mode 2)Offline Mode");
             string ans = Console.ReadLine();
@@ -49,19 +50,17 @@ namespace mdpRandom1
                        Console.WriteLine("connection ok");
                    }
                }
+
+               SyncManager syncManager = new SyncManager();
+               syncManager.SyncPasswords(Db,DbOf, CurrentUser.id);
                currentpwd = Db.GetUserPasswords(CurrentUser.id);
-               SyncPwd = DbOf.GetUserPasswords(CurrentUser.id);
-               
-               
-
-
            }
            else
            { 
                currentpwd = DbOf.GetUserPasswords(1);
            }
 
-           DbOf.GetPasswordsToDelete(CurrentUser.id);
+          
 
            //Db.AddPassword(1, "youtube", "Lord0905", "unpasswordtest");
             //Db.UpdatePassword(3,1, "youtube", "Lord0905", "unpassword");

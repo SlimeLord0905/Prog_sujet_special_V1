@@ -156,6 +156,28 @@ public class DBcontroller
             return false;
         }
     }
+    public bool AddPasswordWithId(int id , int usr_id, String site, String login , String password )
+    {
+        sql = "INSERT into passwords (id,user_id,site,login,password) VALUES ('"+id+"','"+usr_id+"','"+site+"','"+login+"','"+password+"')";
+        var cmd = new MySqlCommand(sql, con);
+        try
+        {
+            var result = cmd.ExecuteNonQuery();
+            if (result != 1)
+            {
+                return false;
+            }
+            else
+            {
+                return true;
+            }
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine("The information you entered were invalid");
+            return false;
+        }
+    }
     public bool UpdatePassword(int id, int usr_id, String site, String login, String password)
     {
         sql = "UPDATE passwords SET user_id ='"+usr_id+"' ,site = '"+site+"',login = '"+login+"',password = '"+password+"',modified_at = CURRENT_DATE WHERE id = '"+id+"'";
