@@ -43,13 +43,20 @@ namespace mdpRandom1
 
                while (CurrentUser.id == -1)
                {
+                   Console.WriteLine("Enter your Username");
+                   string usr = Console.ReadLine();
+
+                   Console.WriteLine("Enter your password");
+                   string usr_pwd = Console.ReadLine();
+
+
                    if (Online)
                    {
-                       CurrentUser = Db.ConnecteUser("denis", "12345678");
+                       CurrentUser = Db.ConnecteUser(usr, usr_pwd);
                    }
                    else
                    {
-                       CurrentUser = DbOf.ConnecteUser("denis", "12345678");
+                       CurrentUser = DbOf.ConnecteUser(usr, usr_pwd);
                    }
                    if (CurrentUser.id != -1)
                    {
