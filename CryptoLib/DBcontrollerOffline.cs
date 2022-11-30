@@ -82,23 +82,16 @@ public class DBcontrollerOffline
                 usr.email = reader.GetString(4);
             }
             reader.Close();
-            if (BCrypt.Net.BCrypt.Verify(usr.password, password))
-            {
-                ConnectedUpdate(usr.id);
-            }
-            else
-            {
-                usr.id = -1;
-            }
+            ConnectedUpdate(usr.id);
+            return usr;
         }
-        return usr;
     }
 
     public List<password> GetUserPasswords(int id)
     {
         List<password> userMdp = new List<password>();
 
-        sql = "SELECT * FROM passwords WHERE user_id ='"+id+"'";
+        sql = "SELECT id,user_id,site, username ,password,created_at,modified_at FROM passwords WHERE user_id ='"+id+"'";
         using (var cmd = new SQLiteCommand(sql, con))
         {
             var reader = cmd.ExecuteReader();
@@ -109,8 +102,8 @@ public class DBcontrollerOffline
                     ,reader.GetString(2)
                     ,reader.GetString(3)
                     ,reader.GetString(4)
-                    ,reader.GetString(5)
-                    ,reader.GetString(6)));
+                    ,"reader.GetString(5)"
+                    ,"reader.GetString(6)"));
             }
             reader.Close();        
         }

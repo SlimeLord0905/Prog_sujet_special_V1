@@ -40,29 +40,34 @@ namespace mdpRandom1
             }
             //String pwd = BCrypt.Net.BCrypt.HashPassword("12345678");
            // Console.WriteLine(pwd);
-           if (Online)
-           {
+
                while (CurrentUser.id == -1)
                {
-                   CurrentUser = Db.ConnecteUser("denis", "12345678");
+                   if (Online)
+                   {
+                       CurrentUser = Db.ConnecteUser("denis", "12345678");
+                   }
+                   else
+                   {
+                       CurrentUser = DbOf.ConnecteUser("denis", "12345678");
+                   }
                    if (CurrentUser.id != -1)
                    {
-                       Console.WriteLine("connection ok");
+                       Console.WriteLine("connection ok"+ CurrentUser.id);
                    }
                }
 
                SyncManager syncManager = new SyncManager();
                syncManager.SyncPasswords(Db,DbOf, CurrentUser.id);
                currentpwd = Db.GetUserPasswords(CurrentUser.id);
-           }
-           else
-           { 
-               currentpwd = DbOf.GetUserPasswords(1);
-           }
+               if (!Online)
+               {
+                   currentpwd = DbOf.GetUserPasswords(1);
+               }
 
-          
 
-           //Db.AddPassword(1, "youtube", "Lord0905", "unpasswordtest");
+
+               //Db.AddPassword(1, "youtube", "Lord0905", "unpasswordtest");
             //Db.UpdatePassword(3,1, "youtube", "Lord0905", "unpassword");
             //Db.DeletePassword(3);
             //Db.AddPasswordToDelete(1);
@@ -161,11 +166,11 @@ namespace mdpRandom1
                     {
                         if (Answer2 == "1")
                         {
-                            Console.WriteLine("type the username associated with your password");
+                            Console.WriteLine("type the website associated with your password");
                             string recherche = Console.ReadLine();
                             foreach (password pwd in currentpwd)
                             {
-                                if (pwd.login.Equals(recherche))
+                                if (pwd.site.Equals(recherche))
                                 {
                                     Console.WriteLine(pwd.id);
                                     Console.WriteLine(pwd.user_id);

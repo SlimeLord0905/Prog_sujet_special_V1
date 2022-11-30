@@ -33,7 +33,16 @@ public class password
         this.site = site;
         this.login = login;
         Password = password;
-        CreatedAt = DateTime.ParseExact(createdAt, "yyyy-MM-dd", CultureInfo.InvariantCulture);
-        ModifiedAt = DateTime.ParseExact(modifiedAt, "yyyy-MM-dd", CultureInfo.InvariantCulture);
+        //CreatedAt = DateTime.ParseExact(createdAt, "yyyy-MM-dd", CultureInfo.InvariantCulture);
+        //ModifiedAt = DateTime.ParseExact(modifiedAt, "yyyy-MM-dd", CultureInfo.InvariantCulture);
+    }
+    
+    public password(int id, int userId, string site, string login, string password)
+    {
+        this.id = id;
+        user_id = userId;
+        this.site = site;
+        this.login = login;
+        Password = password;
     }
 }
